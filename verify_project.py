@@ -108,9 +108,9 @@ def verify_model_inference() -> bool:
     """Downloads BART pre-trained weights and performs an end-to-end inference pass."""
     logger.info("=== STEP 4: Executing Live Neural Transformers Inference (facebook/bart-large-cnn) ===")
     try:
-        from summarizer import TransformerSummarizer, SummaryResult
-        logger.info("Initializing TransformerSummarizer Singleton (this may take a few moments to verify cache)...")
-        engine = TransformerSummarizer()
+        from summarizer import SummarizationEngine, SummaryResult
+        logger.info("Initializing SummarizationEngine Singleton (this may take a few moments to verify cache)...")
+        engine = SummarizationEngine()
         
         sample_article = (
             "The James Webb Space Telescope is the premier space science observatory of the next decade. "

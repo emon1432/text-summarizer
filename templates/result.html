@@ -137,10 +137,8 @@
         <div class="card glass-card result-panel-card summary-glow-card h-100 border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column position-relative">
             <div class="card-header panel-header summary-header px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary-subtle">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="icon-sparkle-wrapper">
-                        <i class="fa-solid fa-wand-magic-sparkles text-gradient fs-5"></i>
-                    </div>
-                    <span class="fw-bold text-light tracking-wide">AI Transformer Abstractive Summary</span>
+                    <i class="fa-solid fa-wand-magic-sparkles text-gradient fs-5"></i>
+                    <span class="fw-bold text-light tracking-wide">AI Abstractive Summary ({{ result.model_display_name }})</span>
                 </div>
                 <button type="button" id="copy-summary-btn" class="btn btn-sm btn-primary gradient-bg rounded-pill px-3 py-1 text-nowrap d-flex align-items-center gap-2 copy-btn" data-clipboard-target="#summary-text-view">
                     <i class="fa-solid fa-clipboard-check"></i>
@@ -162,7 +160,7 @@
 <!-- Embedded JSON Data for Export Mechanics -->
 <script id="summary-data-json" type="application/json">
     {
-        "model": "facebook/bart-large-cnn",
+        "model": "{{ result.model_display_name }}",
         "timestamp": "{{ result.processing_time_seconds }}s runtime",
         "metrics": {
             "original_word_count": {{ result.original_word_count }},

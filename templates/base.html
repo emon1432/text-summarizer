@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI Powered Text Summarization utilizing pre-trained transformer model facebook/bart-large-cnn with PyTorch and Flask.">
+    <meta name="description" content="AI Powered Text Summarization utilizing pre-trained transformer models with PyTorch and Flask.">
     <meta name="keywords" content="AI, NLP, Transformer, BART, Hugging Face, PyTorch, Flask, Summarization">
     <meta name="author" content="Researcher">
     
@@ -48,7 +48,7 @@
                         <li class="nav-item">
                             <span class="badge model-badge d-flex align-items-center gap-2 px-3 py-2">
                                 <i class="fa-brands fa-meta text-info"></i>
-                                <span>Model: <strong>facebook/bart-large-cnn</strong></span>
+                                <span>Model: <strong>{% if result %}{{ result.model_display_name }}{% else %}Multi-Model Engine{% endif %}</strong></span>
                                 <span class="status-indicator animate-pulse"></span>
                             </span>
                         </li>
@@ -59,7 +59,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link custom-nav-link d-flex align-items-center gap-2" href="https://huggingface.co/facebook/bart-large-cnn" target="_blank" rel="noopener noreferrer" id="nav-model-docs">
+                            <a class="nav-link custom-nav-link d-flex align-items-center gap-2" href="https://huggingface.co/models" target="_blank" rel="noopener noreferrer" id="nav-model-docs">
                                 <i class="fa-solid fa-book-atlas"></i>
                                 <span>Model Architecture</span>
                             </a>

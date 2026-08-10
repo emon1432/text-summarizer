@@ -12,7 +12,7 @@
             </h1>
             <p class="lead text-muted px-lg-5 mb-4">
                 Harnessing deep neural sequence-to-sequence attention mechanics with pre-trained 
-                <strong class="text-info font-monospace">facebook/bart-large-cnn</strong> transformers to distill exhaustive prose into high-precision abstractive summaries.
+                <strong class="text-info font-monospace">Transformer</strong> models to distill exhaustive prose into high-precision abstractive summaries.
             </p>
             <div class="d-flex align-items-center justify-content-center gap-4 flex-wrap feature-badges">
                 <span class="d-flex align-items-center gap-2"><i class="fa-solid fa-check-double text-accent"></i> Abstractive Summarization</span>
@@ -93,6 +93,21 @@
                                 <span class="d-none d-sm-inline">Clear Buffer</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Multi-Model Selector -->
+                    <div class="model-selector-panel glass-accordion-item border rounded-3 p-4 bg-dark-subtle mt-4">
+                        <label for="model-select" class="form-label d-flex align-items-center gap-2 fw-semibold text-light mb-3">
+                            <i class="fa-solid fa-microchip text-accent"></i>
+                            <span>Select Neural Architecture</span>
+                        </label>
+                        <select class="form-select custom-select bg-dark text-light border-secondary-subtle" id="model-select" name="model_id">
+                            {% for model in models %}
+                                <option value="{{ model.id }}" {% if model.id == default_model %}selected{% endif %}>
+                                    {{ model.display_name }} ({{ model.max_context_tokens }} max tokens)
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
 
                     <!-- Summary Length Profile Selector -->

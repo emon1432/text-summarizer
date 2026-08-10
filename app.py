@@ -11,7 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.exceptions import HTTPException
 
 from config import config_by_name, Config
-from summarizer import TransformerSummarizer, SummaryResult, count_words
+from summarizer import SummarizationEngine, SummaryResult, MODEL_REGISTRY, DEFAULT_MODEL_ID, count_words
 
 # Configure Flask Controller Logger
 logger = logging.getLogger(__name__)
@@ -82,9 +82,8 @@ def register_routes(app: Flask) -> None:
         return render_template(
             "index.html",
             max_words=Config.MAX_INPUT_WORDS,
-            default_max_len=Config.DEFAULT_MAX_LENGTH,
-            default_min_len=Config.DEFAULT_MIN_LENGTH,
-            default_beams=Config.DEFAULT_NUM_BEAMS
+            models=MODEL_REGISTRY.values(),
+            default_model=DEFAULT_MODEL_ID
         )
 
     @app.route("/summarize", methods=["POST"])
@@ -120,12 +119,16 @@ def register_routes(app: Flask) -> None:
 
         try:
             logger.info(f"Received web summarization request for text comprising {word_count} words.")
-            engine = TransformerSummarizer()
+            
+            model_id = request.form.get("model_id", DEFAULT_MODEL_ID)
+            
+            engine = SummarizationEngine()
             result: SummaryResult = engine.summarize(
                 raw_text=input_text,
                 max_length=max_len,
                 min_length=min_len,
-                num_beams=num_beams
+                num_beams=num_beams,
+                model_id=model_id
             )
             
             return render_template("result.html", result=result)
@@ -161,12 +164,15 @@ def register_routes(app: Flask) -> None:
                 payload.get("length_profile", "medium")
             )
 
-            engine = TransformerSummarizer()
+            model_id = str(payload.get("model_id", DEFAULT_MODEL_ID)).strip()
+
+            engine = SummarizationEngine()
             output: SummaryResult = engine.summarize(
                 raw_text=text_data,
                 max_length=max_len,
                 min_length=min_len,
-                num_beams=num_beams
+                num_beams=num_beams,
+                model_id=model_id
             )
 
             return jsonify({
