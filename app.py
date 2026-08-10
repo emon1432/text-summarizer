@@ -42,37 +42,27 @@ def create_app(config_name: str = "default") -> Flask:
     return app
 
 
-def validate_and_clamp_hyperparams(max_val: Any, min_val: Any, beams: Any) -> tuple[int, int, int]:
-    """Validates and clamps generation hyperparameters to prevent computational overload or DoS vectors.
+LENGTH_PROFILES = {
+    "short": {"max_length": 80, "min_length": 25, "num_beams": 4},
+    "medium": {"max_length": 150, "min_length": 45, "num_beams": 4},
+    "detailed": {"max_length": 250, "min_length": 80, "num_beams": 6}
+}
+
+def get_hyperparams_from_profile(profile: str) -> tuple[int, int, int]:
+    """Retrieves validated model generation parameters mapped from a user-selected profile.
 
     Args:
-        max_val (Any): Requested maximum output token sequence length.
-        min_val (Any): Requested minimum output token sequence length.
-        beams (Any): Number of concurrent paths for Beam Search decoding.
+        profile (str): Length profile requested by the user ('short', 'medium', 'detailed').
 
     Returns:
-        tuple[int, int, int]: Validated and safely clamped (max_length, min_length, num_beams) values.
+        tuple[int, int, int]: (max_length, min_length, num_beams) values.
     """
-    try:
-        clean_max = max(20, min(500, int(max_val)))
-    except (ValueError, TypeError):
-        clean_max = Config.DEFAULT_MAX_LENGTH
-        
-    try:
-        clean_min = max(5, min(300, int(min_val)))
-    except (ValueError, TypeError):
-        clean_min = Config.DEFAULT_MIN_LENGTH
-        
-    try:
-        clean_beams = max(1, min(8, int(beams)))
-    except (ValueError, TypeError):
-        clean_beams = Config.DEFAULT_NUM_BEAMS
-
-    # Ensure min_length never matches or exceeds max_length
-    if clean_min >= clean_max:
-        clean_min = max(5, clean_max - 10)
-
-    return clean_max, clean_min, clean_beams
+    safe_profile = str(profile).strip().lower()
+    if safe_profile not in LENGTH_PROFILES:
+        safe_profile = "medium"
+    
+    settings = LENGTH_PROFILES[safe_profile]
+    return settings["max_length"], settings["min_length"], settings["num_beams"]
 
 
 def register_routes(app: Flask) -> None:
@@ -106,11 +96,9 @@ def register_routes(app: Flask) -> None:
         """
         input_text = request.form.get("input_text", "").strip()
         
-        # Validate and safely clamp hyperparameter inputs
-        max_len, min_len, num_beams = validate_and_clamp_hyperparams(
-            request.form.get("max_length", Config.DEFAULT_MAX_LENGTH),
-            request.form.get("min_length", Config.DEFAULT_MIN_LENGTH),
-            request.form.get("num_beams", Config.DEFAULT_NUM_BEAMS)
+        # Convert user-friendly length profile into exact neural hyperparameters
+        max_len, min_len, num_beams = get_hyperparams_from_profile(
+            request.form.get("length_profile", "medium")
         )
 
         # Input Validation Checkpoints (consistent with client-side Javascript rules)
@@ -169,10 +157,8 @@ def register_routes(app: Flask) -> None:
 
         try:
             # Safely clamp API hyperparameter parameters against DoS computational attacks
-            max_len, min_len, num_beams = validate_and_clamp_hyperparams(
-                payload.get("max_length", Config.DEFAULT_MAX_LENGTH),
-                payload.get("min_length", Config.DEFAULT_MIN_LENGTH),
-                payload.get("num_beams", Config.DEFAULT_NUM_BEAMS)
+            max_len, min_len, num_beams = get_hyperparams_from_profile(
+                payload.get("length_profile", "medium")
             )
 
             engine = TransformerSummarizer()

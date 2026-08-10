@@ -30,19 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (textarea) textarea.readOnly = false;
     });
 
-    // Hyperparameter Sliders Value Binding
-    const bindSlider = (sliderId, displayId, suffix = "") => {
-        const slider = document.getElementById(sliderId);
-        const display = document.getElementById(displayId);
-        if (slider && display) {
-            slider.addEventListener("input", (e) => {
-                display.textContent = `${e.target.value} ${suffix}`.trim();
-            });
-        }
-    };
-    bindSlider("max-length-input", "max-length-display", "tokens");
-    bindSlider("min-length-input", "min-length-display", "tokens");
-    bindSlider("num-beams-input", "num-beams-display", "beams");
+
 
     // Real-time Word & Character Calculation Engine
     const updateCounts = () => {

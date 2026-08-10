@@ -95,52 +95,30 @@
                         </div>
                     </div>
 
-                    <!-- Optional Advanced Hyperparameter Configuration Panel -->
-                    <div class="accordion custom-accordion" id="hyperparamsAccordion">
-                        <div class="accordion-item glass-accordion-item border rounded-3">
-                            <h2 class="accordion-header" id="headingOne">
-                                <button class="accordion-button collapsed py-3 px-4 rounded-3 d-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHyperparams" aria-expanded="false" aria-controls="collapseHyperparams">
-                                    <i class="fa-solid fa-sliders text-accent me-2"></i>
-                                    <span class="fw-semibold">Advanced Transformer Hyperparameter Override (Optional)</span>
-                                    <span class="badge bg-secondary-subtle text-light ms-auto me-3">Beam Search & Length Boundaries</span>
-                                </button>
-                            </h2>
-                            <div id="collapseHyperparams" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#hyperparamsAccordion">
-                                <div class="accordion-body p-4 bg-dark-subtle border-top border-secondary-subtle">
-                                    <div class="row g-4">
-                                        
-                                        <!-- Max Summary Length Slider -->
-                                        <div class="col-md-4">
-                                            <label for="max-length-input" class="form-label d-flex justify-content-between align-items-center fw-semibold text-light small mb-2">
-                                                <span>Max Token Ceiling:</span>
-                                                <span class="badge gradient-bg px-2 py-1" id="max-length-display">{{ default_max_len }} tokens</span>
-                                            </label>
-                                            <input type="range" class="form-range custom-range" id="max-length-input" name="max_length" min="40" max="400" step="10" value="{{ default_max_len }}">
-                                            <div class="form-text text-muted small">Upper bound token sequence generated per chunk.</div>
-                                        </div>
-
-                                        <!-- Min Summary Length Slider -->
-                                        <div class="col-md-4">
-                                            <label for="min-length-input" class="form-label d-flex justify-content-between align-items-center fw-semibold text-light small mb-2">
-                                                <span>Min Token Floor:</span>
-                                                <span class="badge gradient-bg px-2 py-1" id="min-length-display">{{ default_min_len }} tokens</span>
-                                            </label>
-                                            <input type="range" class="form-range custom-range" id="min-length-input" name="min_length" min="10" max="100" step="5" value="{{ default_min_len }}">
-                                            <div class="form-text text-muted small">Enforces lower bound detail depth in generation.</div>
-                                        </div>
-
-                                        <!-- Beam Search Width -->
-                                        <div class="col-md-4">
-                                            <label for="num-beams-input" class="form-label d-flex justify-content-between align-items-center fw-semibold text-light small mb-2">
-                                                <span>Decoding Beams:</span>
-                                                <span class="badge gradient-bg px-2 py-1" id="num-beams-display">{{ default_beams }} beams</span>
-                                            </label>
-                                            <input type="range" class="form-range custom-range" id="num-beams-input" name="num_beams" min="2" max="8" step="1" value="{{ default_beams }}">
-                                            <div class="form-text text-muted small">Number of concurrent hypotheses evaluated during inference.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Summary Length Profile Selector -->
+                    <div class="length-selector-panel glass-accordion-item border rounded-3 p-4 bg-dark-subtle mt-2">
+                        <label class="form-label d-flex align-items-center gap-2 fw-semibold text-light mb-3">
+                            <i class="fa-solid fa-sliders text-accent"></i>
+                            <span>Summary Detail Level</span>
+                        </label>
+                        <div class="btn-group w-100" role="group" aria-label="Summary Length Options">
+                            <input type="radio" class="btn-check" name="length_profile" id="length-short" value="short" autocomplete="off">
+                            <label class="btn btn-outline-info flex-grow-1" for="length-short">
+                                <div class="fw-bold">Concise</div>
+                                <small class="d-block text-opacity-75">Quick Overview</small>
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="length_profile" id="length-medium" value="medium" autocomplete="off" checked>
+                            <label class="btn btn-outline-info flex-grow-1" for="length-medium">
+                                <div class="fw-bold">Standard</div>
+                                <small class="d-block text-opacity-75">Balanced</small>
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="length_profile" id="length-detailed" value="detailed" autocomplete="off">
+                            <label class="btn btn-outline-info flex-grow-1" for="length-detailed">
+                                <div class="fw-bold">Comprehensive</div>
+                                <small class="d-block text-opacity-75">In-depth Abstraction</small>
+                            </label>
                         </div>
                     </div>
 
