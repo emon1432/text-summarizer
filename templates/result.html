@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Summarization Analysis Report | AI Text Summarizer{% endblock %}
+
+{% block content %}
+<!-- Page Header Navigation & Title -->
+<section class="mb-5 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 border-bottom border-secondary-subtle pb-4" aria-labelledby="report-heading">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check"></i> Inference Successful
+            </span>
+            <span class="badge bg-secondary text-light px-3 py-1 rounded-pill font-monospace">
+                Hardware Accelerator: {{ result.device_used | upper }}
+            </span>
+        </div>
+        <h1 id="report-heading" class="display-6 fw-bold text-light mb-0">
+            AI Summarization Analysis & Metrics Report
+        </h1>
+    </div>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <button type="button" id="export-json-btn" class="btn btn-outline-light btn-sm px-4 py-2 rounded-pill d-flex align-items-center gap-2" title="Download academic JSON metric report">
+            <i class="fa-solid fa-file-export text-info"></i>
+            <span>Export Metrics JSON</span>
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-primary gradient-btn btn-sm px-4 py-2 rounded-pill fw-semibold d-flex align-items-center gap-2" title="Return to primary terminal">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Summarize Another Document</span>
+        </a>
+    </div>
+</section>
+
+<!-- KPI Analytics Cards Dashboard -->
+<section class="row g-4 mb-5" aria-label="Performance Metrics">
+    
+    <!-- KPI 1: Original Word Count -->
+    <div class="col-6 col-lg-3">
+        <div class="card glass-kpi-card h-100 border-0 rounded-4 p-4 d-flex flex-column justify-content-between shadow-sm position-relative overflow-hidden">
+            <div class="kpi-glow-bg glow-blue"></div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-muted fw-semibold text-uppercase tracking-wider small">Original Volume</span>
+                <div class="kpi-icon-wrapper bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-file-lines fs-5"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="kpi-value fw-bold text-light mb-1">{{ result.original_word_count }}</h3>
+                <span class="text-muted small">Total Source Words</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 2: Summary Word Count -->
+    <div class="col-6 col-lg-3">
+        <div class="card glass-kpi-card h-100 border-0 rounded-4 p-4 d-flex flex-column justify-content-between shadow-sm position-relative overflow-hidden">
+            <div class="kpi-glow-bg glow-purple"></div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-muted fw-semibold text-uppercase tracking-wider small">Summary Volume</span>
+                <div class="kpi-icon-wrapper bg-purple-subtle text-accent rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-compress fs-5"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="kpi-value fw-bold text-light mb-1">{{ result.summary_word_count }}</h3>
+                <span class="text-muted small">Distilled Words</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 3: Compression Percentage -->
+    <div class="col-6 col-lg-3">
+        <div class="card glass-kpi-card h-100 border-0 rounded-4 p-4 d-flex flex-column justify-content-between shadow-sm position-relative overflow-hidden">
+            <div class="kpi-glow-bg glow-green"></div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-muted fw-semibold text-uppercase tracking-wider small">Compression Rate</span>
+                <div class="kpi-icon-wrapper bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-chart-pie fs-5"></i>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h3 class="kpi-value fw-bold text-light mb-1">{{ result.compression_percentage }}%</h3>
+                    <span class="badge bg-success-subtle text-success small rounded-pill">Reduction</span>
+                </div>
+                <span class="text-muted small">Volume Footprint Saved</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 4: Processing Time -->
+    <div class="col-6 col-lg-3">
+        <div class="card glass-kpi-card h-100 border-0 rounded-4 p-4 d-flex flex-column justify-content-between shadow-sm position-relative overflow-hidden">
+            <div class="kpi-glow-bg glow-orange"></div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-muted fw-semibold text-uppercase tracking-wider small">Processing Time</span>
+                <div class="kpi-icon-wrapper bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-stopwatch-20 fs-5"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="kpi-value fw-bold text-light mb-1">{{ result.processing_time_seconds }} <span class="fs-6 fw-normal text-muted">sec</span></h3>
+                <span class="text-muted small">Inference Latency</span>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!-- Side-by-Side Comparative Presentation Area -->
+<section class="row g-4" aria-label="Comparison Cards">
+    
+    <!-- Left Panel: Original Input Text -->
+    <div class="col-lg-6">
+        <div class="card glass-card result-panel-card h-100 border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column">
+            <div class="card-header panel-header px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary-subtle">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-file-text text-primary fs-5"></i>
+                    <span class="fw-bold text-light tracking-wide">Original Source Document</span>
+                </div>
+                <button type="button" id="copy-original-btn" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap d-flex align-items-center gap-2 copy-btn" data-clipboard-target="#original-text-view">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy Original</span>
+                </button>
+            </div>
+            <div class="card-body p-4 custom-scrollbar text-viewport flex-grow-1" id="original-text-view">
+                <p class="text-prose text-light mb-0 lh-lg whitespace-pre-line">{{ result.original_text }}</p>
+            </div>
+            <div class="card-footer px-4 py-2 border-top border-secondary-subtle bg-dark-subtle d-flex justify-content-between text-muted small">
+                <span>Total Length: {{ result.original_word_count }} tokens</span>
+                <span>Uncompressed Document</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: AI Transformer Summary (Featured Glow Card) -->
+    <div class="col-lg-6">
+        <div class="card glass-card result-panel-card summary-glow-card h-100 border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column position-relative">
+            <div class="card-header panel-header summary-header px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary-subtle">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="icon-sparkle-wrapper">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gradient fs-5"></i>
+                    </div>
+                    <span class="fw-bold text-light tracking-wide">AI Transformer Abstractive Summary</span>
+                </div>
+                <button type="button" id="copy-summary-btn" class="btn btn-sm btn-primary gradient-bg rounded-pill px-3 py-1 text-nowrap d-flex align-items-center gap-2 copy-btn" data-clipboard-target="#summary-text-view">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>Copy Summary</span>
+                </button>
+            </div>
+            <div class="card-body p-4 custom-scrollbar text-viewport flex-grow-1 bg-highlight-subtle" id="summary-text-view">
+                <p class="text-prose summary-text-highlight mb-0 lh-lg whitespace-pre-line fw-medium">{{ result.summary_text }}</p>
+            </div>
+            <div class="card-footer px-4 py-2 border-top border-secondary-subtle bg-dark-subtle d-flex justify-content-between text-muted small">
+                <span>Distilled Length: {{ result.summary_word_count }} tokens</span>
+                <span class="text-success fw-semibold"><i class="fa-solid fa-arrow-down me-1"></i>{{ result.compression_percentage }}% Compressed</span>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!-- Embedded JSON Data for Export Mechanics -->
+<script id="summary-data-json" type="application/json">
+    {
+        "model": "facebook/bart-large-cnn",
+        "timestamp": "{{ result.processing_time_seconds }}s runtime",
+        "metrics": {
+            "original_word_count": {{ result.original_word_count }},
+            "summary_word_count": {{ result.summary_word_count }},
+            "compression_percentage": {{ result.compression_percentage }},
+            "processing_time_seconds": {{ result.processing_time_seconds }},
+            "device_used": "{{ result.device_used }}"
+        },
+        "content": {
+            "original_text": {{ result.original_text | tojson }},
+            "summary_text": {{ result.summary_text | tojson }}
+        }
+    }
+</script>
+{% endblock %}
