@@ -43,26 +43,26 @@ def create_app(config_name: str = "default") -> Flask:
 
 
 LENGTH_PROFILES = {
-    "short": {"max_length": 80, "min_length": 25, "num_beams": 4},
-    "medium": {"max_length": 150, "min_length": 45, "num_beams": 4},
-    "detailed": {"max_length": 250, "min_length": 80, "num_beams": 6}
+    "short": {"max_length": 80, "min_length": 25},
+    "medium": {"max_length": 150, "min_length": 45},
+    "detailed": {"max_length": 250, "min_length": 80}
 }
 
-def get_hyperparams_from_profile(profile: str) -> tuple[int, int, int]:
+def get_hyperparams_from_profile(profile: str) -> tuple[int, int]:
     """Retrieves validated model generation parameters mapped from a user-selected profile.
 
     Args:
         profile (str): Length profile requested by the user ('short', 'medium', 'detailed').
 
     Returns:
-        tuple[int, int, int]: (max_length, min_length, num_beams) values.
+        tuple[int, int]: (max_length, min_length) values.
     """
     safe_profile = str(profile).strip().lower()
     if safe_profile not in LENGTH_PROFILES:
         safe_profile = "medium"
     
     settings = LENGTH_PROFILES[safe_profile]
-    return settings["max_length"], settings["min_length"], settings["num_beams"]
+    return settings["max_length"], settings["min_length"]
 
 
 def register_routes(app: Flask) -> None:
@@ -96,7 +96,7 @@ def register_routes(app: Flask) -> None:
         input_text = request.form.get("input_text", "").strip()
         
         # Convert user-friendly length profile into exact neural hyperparameters
-        max_len, min_len, num_beams = get_hyperparams_from_profile(
+        max_len, min_len = get_hyperparams_from_profile(
             request.form.get("length_profile", "medium")
         )
 
@@ -127,7 +127,6 @@ def register_routes(app: Flask) -> None:
                 raw_text=input_text,
                 max_length=max_len,
                 min_length=min_len,
-                num_beams=num_beams,
                 model_id=model_id
             )
             
@@ -143,7 +142,7 @@ def register_routes(app: Flask) -> None:
         """RESTful JSON endpoint allowing external consumer apps to invoke transformer inference.
 
         Expected JSON body:
-            {"text": "long english string...", "max_length": 130, "min_length": 30, "num_beams": 4}
+            {"text": "long english string...", "max_length": 130, "min_length": 30}
 
         Returns:
             Tuple[Response, int]: JSON response payload accompanied by HTTP status code.
@@ -160,7 +159,7 @@ def register_routes(app: Flask) -> None:
 
         try:
             # Safely clamp API hyperparameter parameters against DoS computational attacks
-            max_len, min_len, num_beams = get_hyperparams_from_profile(
+            max_len, min_len = get_hyperparams_from_profile(
                 payload.get("length_profile", "medium")
             )
 
@@ -171,7 +170,6 @@ def register_routes(app: Flask) -> None:
                 raw_text=text_data,
                 max_length=max_len,
                 min_length=min_len,
-                num_beams=num_beams,
                 model_id=model_id
             )
 

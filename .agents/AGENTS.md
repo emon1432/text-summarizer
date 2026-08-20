@@ -20,3 +20,7 @@ This document defines the core rules, constraints, and behavioral instructions f
 - **Frontend (Web)**:
   - Keep the UI simple and clean. Use standard Jinja2 syntax (e.g., `{{ variable }}` instead of `{{ variable:, }}`).
   - Maintain browser bfcache back-navigation recovery in `static/js/main.js` (using the `pageshow` event listener) so that loading spinners do not permanently lock the UI.
+
+## 4. Execution & Background Task Constraints
+- **Time Limit:** NEVER run any background task or command that is expected to take longer than 120 seconds (e.g., heavy neural inference, massive downloads).
+- **Manual Execution:** If a task takes longer than 120 seconds, instruct the user to run the command manually in their terminal instead of starting it as a background task. This prevents excessive API token usage from polling/waiting.

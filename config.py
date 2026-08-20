@@ -41,8 +41,6 @@ class Config:
     # Summarization Inference Hyperparameters
     DEFAULT_MAX_LENGTH: int = 130
     DEFAULT_MIN_LENGTH: int = 30
-    DEFAULT_NUM_BEAMS: int = 4
-    LENGTH_PENALTY: float = 2.0
 
     # Device allocation: When None, model module automatically detects CUDA presence
     DEVICE: Optional[str] = os.getenv('INFERENCE_DEVICE', None)

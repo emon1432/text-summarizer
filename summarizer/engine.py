@@ -119,7 +119,6 @@ class SummarizationEngine:
         raw_text: str,
         max_length: int = Config.DEFAULT_MAX_LENGTH,
         min_length: int = Config.DEFAULT_MIN_LENGTH,
-        num_beams: int = Config.DEFAULT_NUM_BEAMS,
         model_id: str = DEFAULT_MODEL_ID
     ) -> SummaryResult:
         """Orchestrates chunking and generation for the specified model."""
@@ -130,8 +129,9 @@ class SummarizationEngine:
         adapter = self.active_adapter
         
         max_len = max(20, min(500, int(max_length)))
-        min_len = max(5, min(300, int(min_length)))
-        beams = max(1, min(8, int(num_beams)))
+        base_min_len = int(min_length * adapter.model_info.min_length_multiplier)
+        min_len = max(5, min(300, base_min_len))
+        beams = max(1, min(8, adapter.model_info.default_num_beams))
         if min_len >= max_len:
             min_len = max(5, max_len - 10)
 
@@ -156,32 +156,67 @@ class SummarizationEngine:
             max_context = adapter.model_info.max_context_tokens
             safe_bpe_limit = max_context - 50  # Leave room for special tokens and prefix
             
-            chunks = chunk_text_by_sentences(
+            # Segment source document into initial chunks
+            current_chunks = chunk_text_by_sentences(
                 cleaned_text,
                 max_words_per_chunk=350, # Slightly lower to accommodate T5's smaller 512 window
                 tokenizer=adapter.tokenizer,
                 max_tokens=safe_bpe_limit
             )
-            logger.info(f"Input document segmented into {len(chunks)} independent execution chunk(s) (Limit: {safe_bpe_limit} tokens).")
+            logger.info(f"Input document segmented into {len(current_chunks)} independent execution chunk(s) (Limit: {safe_bpe_limit} tokens).")
 
-            summarized_chunks: list[str] = []
-            for idx, chunk in enumerate(chunks, 1):
-                logger.debug(f"Executing sequence generation on chunk {idx}/{len(chunks)}...")
-                chunk_words = count_words(chunk)
-                effective_max_len = max(15, min(max_len, max(30, chunk_words)))
-                effective_min_len = min(min_len, int(effective_max_len * 0.4))
-                if effective_min_len >= effective_max_len:
-                    effective_min_len = max(1, effective_max_len - 5)
+            stage = 1
+            while len(current_chunks) > 1 or stage == 1:
+                # For recursive stages, combine previous summaries and re-chunk if needed
+                if stage > 1:
+                    combined_text = " ".join(current_chunks).strip()
+                    combined_tokens = len(adapter.tokenizer.encode(combined_text, add_special_tokens=False))
+                    
+                    if combined_tokens <= safe_bpe_limit:
+                        current_chunks = [combined_text]
+                    else:
+                        new_chunks = chunk_text_by_sentences(
+                            combined_text,
+                            max_words_per_chunk=350,
+                            tokenizer=adapter.tokenizer,
+                            max_tokens=safe_bpe_limit
+                        )
+                        # Safety circuit breaker to prevent infinite loops if compression stalls
+                        if len(new_chunks) >= len(current_chunks):
+                            logger.warning("Compression plateau reached in hierarchical summarization. Stopping early.")
+                            break
+                        current_chunks = new_chunks
 
-                chunk_summary = adapter.generate_chunk(
-                    chunk_text=chunk,
-                    max_length=effective_max_len,
-                    min_length=effective_min_len,
-                    num_beams=beams
-                )
-                summarized_chunks.append(chunk_summary)
+                if len(current_chunks) == 1 and stage > 1:
+                    logger.info(f"Executing final global hierarchical pass (Stage {stage})...")
+                elif stage > 1:
+                    logger.info(f"Executing intermediate hierarchical pass (Stage {stage}) with {len(current_chunks)} chunks...")
 
-            final_summary_text = " ".join(summarized_chunks).strip()
+                summarized_chunks: list[str] = []
+                for idx, chunk in enumerate(current_chunks, 1):
+                    logger.debug(f"Executing sequence generation on chunk {idx}/{len(current_chunks)}...")
+                    chunk_words = count_words(chunk)
+                    effective_max_len = max(15, min(max_len, max(30, chunk_words)))
+                    effective_min_len = min(min_len, int(effective_max_len * 0.4))
+                    if effective_min_len >= effective_max_len:
+                        effective_min_len = max(1, effective_max_len - 5)
+
+                    chunk_summary = adapter.generate_chunk(
+                        chunk_text=chunk,
+                        max_length=effective_max_len,
+                        min_length=effective_min_len,
+                        num_beams=beams
+                    )
+                    summarized_chunks.append(chunk_summary)
+
+                current_chunks = summarized_chunks
+                stage += 1
+                
+                # If we successfully reduced down to 1 chunk and processed it, we are done
+                if len(current_chunks) == 1:
+                    break
+
+            final_summary_text = " ".join(current_chunks).strip()
             summary_word_count = count_words(final_summary_text)
             compression_rate = calculate_compression_rate(orig_word_count, summary_word_count)
 

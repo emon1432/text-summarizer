@@ -74,7 +74,7 @@ class BartAdapter(BaseModelAdapter):
                 max_length=max_length,
                 min_length=min_length,
                 num_beams=num_beams,
-                length_penalty=Config.LENGTH_PENALTY,
+                length_penalty=self.model_info.default_length_penalty,
                 early_stopping=True
             )
 
@@ -112,7 +112,7 @@ class T5Adapter(BaseModelAdapter):
                 max_length=max_length,
                 min_length=min_length,
                 num_beams=num_beams,
-                length_penalty=Config.LENGTH_PENALTY,
+                length_penalty=self.model_info.default_length_penalty,
                 early_stopping=True
             )
 
