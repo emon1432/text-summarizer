@@ -10,6 +10,7 @@ Usage:
 import sys
 import argparse
 import logging
+from importlib.metadata import version
 
 # Configure Verification Test Logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | [%(levelname)s] | %(message)s")
@@ -33,7 +34,7 @@ def verify_environment() -> bool:
         import transformers
         import accelerate
         import sentencepiece
-        logger.info(f"✔ Flask verified (v{flask.__version__})")
+        logger.info(f"✔ Flask verified (v{version("flask")})")
         logger.info(f"✔ PyTorch verified (v{torch.__version__}) | CUDA Available: {torch.cuda.is_available()}")
         logger.info(f"✔ Hugging Face Transformers verified (v{transformers.__version__})")
         logger.info(f"✔ Accelerate & SentencePiece libraries verified successfully")
